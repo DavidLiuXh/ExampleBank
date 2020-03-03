@@ -1,10 +1,8 @@
-[toc]
-
 #### 使用mvn创建java工程
 
 #### 安装mvn
 
-我们之前参考官网就好: [Installing Apache Maven](http://maven.apache.org/install.html)
+我们参考官网就好: [Installing Apache Maven](http://maven.apache.org/install.html)
 
 ##### 创建java工程
 
@@ -114,7 +112,7 @@
 
   ```
   BK_CLASSPATH=""                                                                                                                                         #收集lib下面所有的jar包作为`-cp`的参数 
-  for i in $1/*.jar; do
+  for i in [lib目录的路径]/*.jar; do
       BK_CLASSPATH=${BK_CLASSPATH}:${i}
   done   
   

@@ -112,7 +112,7 @@
 
   ```
   BK_CLASSPATH=""                                                                                                                                         #收集lib下面所有的jar包作为`-cp`的参数 
-  for i in $1/*.jar; do
+  for i in [lib目录的路径]/*.jar; do
       BK_CLASSPATH=${BK_CLASSPATH}:${i}
   done   
   

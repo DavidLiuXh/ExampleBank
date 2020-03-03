@@ -2,7 +2,7 @@
 
 #### 安装mvn
 
-我们之前参考官网就好: [Installing Apache Maven](http://maven.apache.org/install.html)
+我们参考官网就好: [Installing Apache Maven](http://maven.apache.org/install.html)
 
 ##### 创建java工程
 

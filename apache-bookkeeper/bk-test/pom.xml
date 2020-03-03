@@ -18,7 +18,7 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <bookkeeper.version>4.9.2</bookkeeper.version>
-    <bookkeeper.localpath>[your path]/bookkeeper-4.9.2</bookkeeper.localpath>
+    <bookkeeper.localpath>[your path]/bookkeeper-${bookkeeper.version}</bookkeeper.localpath>
   </properties>
 
   <dependencies>
@@ -115,36 +115,37 @@
       <groupId>org.apache.bookkeeper</groupId>
       <artifactId>bookkeeper-server</artifactId>
       <version>${bookkeeper.version}</version>
+      <!--如果使用mvn库中的jar包，注释掉下面两行即可-->
       <scope>system</scope>  
-      <systemPath>${bookkeeper.localpath}/bookkeeper-server/target/bookkeeper-server-4.9.2.jar</systemPath>  
+      <systemPath>${bookkeeper.localpath}/bookkeeper-server/target/bookkeeper-server-${bookkeeper.version}.jar</systemPath>  
     </dependency>
      <dependency>  
       <groupId>org.apache.bookkeeper</groupId>
       <artifactId>bookkeeper-stats-api</artifactId>
       <version>${bookkeeper.version}</version>
       <scope>system</scope>  
-      <systemPath>${bookkeeper.localpath}/bookkeeper-stats/target/bookkeeper-stats-api-4.9.2.jar</systemPath>  
+      <systemPath>${bookkeeper.localpath}/bookkeeper-stats/target/bookkeeper-stats-api-${bookkeeper.version}.jar</systemPath>  
     </dependency>
      <dependency>  
       <groupId>org.apache.bookkeeper</groupId>
       <artifactId>bookkeeper-common</artifactId>
       <version>${bookkeeper.version}</version>
       <scope>system</scope>  
-      <systemPath>${bookkeeper.localpath}/bookkeeper-common/target/bookkeeper-common-4.9.2.jar</systemPath>  
+      <systemPath>${bookkeeper.localpath}/bookkeeper-common/target/bookkeeper-common-${bookkeeper.version}.jar</systemPath>  
     </dependency>
      <dependency>  
       <groupId>org.apache.bookkeeper</groupId>
-      <artifactId>bookkeeper-common-allocator-4.9.2.jar</artifactId>
+      <artifactId>bookkeeper-common-allocator-${bookkeeper.version}.jar</artifactId>
       <version>${bookkeeper.version}</version>
       <scope>system</scope>  
-      <systemPath>${bookkeeper.localpath}/bookkeeper-common-allocator/target/bookkeeper-common-allocator-4.9.2.jar</systemPath>  
+      <systemPath>${bookkeeper.localpath}/bookkeeper-common-allocator/target/bookkeeper-common-allocator-${bookkeeper.version}.jar</systemPath>  
     </dependency>
      <dependency>  
       <groupId>org.apache.bookkeeper</groupId>
       <artifactId>bookkeeper-proto</artifactId>
       <version>${bookkeeper.version}</version>
       <scope>system</scope>  
-      <systemPath>${bookkeeper.localpath}/bookkeeper-proto/target/bookkeeper-proto-4.9.2.jar</systemPath>  
+      <systemPath>${bookkeeper.localpath}/bookkeeper-proto/target/bookkeeper-proto-${bookkeeper.version}.jar</systemPath>  
     </dependency>
   </dependencies>
 
@@ -197,7 +198,7 @@
                         <goal>copy-dependencies</goal>
                     </goals>
                     <configuration>
-                        <outputDirectory>/home/lw/opensource/bookkeeper-4.9.2/test/bk-test/lib</outputDirectory>
+                        <outputDirectory>/home/lw/opensource/bookkeeper-${bookkeeper.version}/test/bk-test/lib</outputDirectory>
                     </configuration>
                 </execution>
             </executions>

@@ -60,6 +60,8 @@ public class App
             if (close) {
                 writer.get().close();
             }
+
+            bkClient.close();
         } catch (InterruptedException | IOException | org.apache.bookkeeper.client.api.BKException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -90,6 +92,8 @@ public class App
             if (close) {
                 writer.close();
             }
+
+            bkClient.close();
         } catch (InterruptedException | IOException | org.apache.bookkeeper.client.api.BKException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -121,6 +125,8 @@ public class App
             }
 
             reader.close();
+
+            bkClient.close();
         } catch (InterruptedException | IOException | org.apache.bookkeeper.client.api.BKException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -165,14 +171,16 @@ public class App
             });
 
             reader.close();
+
+            bkClient.close();
         } catch (InterruptedException | IOException | org.apache.bookkeeper.client.api.BKException | ExecutionException e) {
             e.printStackTrace();
         }
     }
     public static void main(String[] args) {
         long ledgerId = createAndWriteLedgerWithClose(true);
-        asyncReadLedger(ledgerId);
+        //asyncReadLedger(ledgerId);
         //long ledgerId = asynCreateAndWriteLedgerWithClose(true);
-        //readLedger(ledgerId);
+        readLedger(ledgerId);
     }
 }

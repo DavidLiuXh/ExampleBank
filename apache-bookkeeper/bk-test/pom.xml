@@ -19,6 +19,7 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <bookkeeper.version>4.9.2</bookkeeper.version>
     <bookkeeper.localpath>[your path]/bookkeeper-${bookkeeper.version}</bookkeeper.localpath>
+    <!--<bookkeeper.localpath>/home/lw/opensource/bookkeeper-${bookkeeper.version}</bookkeeper.localpath>-->
   </properties>
 
   <dependencies>
@@ -40,20 +41,11 @@
       <artifactId>slf4j-log4j12</artifactId>
       <version>1.7.25</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
     <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-handler</artifactId>
-      <version>4.1.45.Final</version>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-transport-native-epoll</artifactId>
-      <version>4.1.31.Final</version>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-tcnative-boringssl-static</artifactId>
-      <version>2.0.19.Final</version>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-all</artifactId>
+        <version>4.1.46.Final</version>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>

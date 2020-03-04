@@ -22,13 +22,18 @@ public class App
 {
     private static final String METADATA_SERVICE_URI = "zk+hierarchical://10.0.2.15:2181/ledgers";
 
-    private static void printCurrentThreadInfo(String msg) {
+    private static void printCurrentThreadInfo() {
         Thread t = Thread.currentThread();
-        System.out.println("Flag: " + msg + " | 当前线程名字：" + t.getName() + " | 当前线程的优先级别为：" + t.getPriority() + " | ID:" + t.getId());
+        System.out.println("Fun: " + Thread.currentThread().getStackTrace()[2].getMethodName() +
+                " | 当前线程名字：" + t.getName() + 
+                " | 当前线程的优先级别为：" + t.getPriority() +
+                " | ID:" + t.getId());
     }
 
     private static long asynCreateAndWriteLedgerWithClose(boolean close) {
         long ledgerId = -1;
+
+        printCurrentThreadInfo();
 
         try {
             ClientConfiguration clientConfig = new ClientConfiguration();
@@ -42,12 +47,13 @@ public class App
                 .withPassword("some-password".getBytes())
                 .execute()
                 .whenComplete((w, e) -> {
-                System.out.printf("ssssss");
-                    if (e != null) {
+                    printCurrentThreadInfo();
+
+                    if (e == null) {
                         try {
                             w.append("1".getBytes());
                             w.append("2".getBytes());
-                        } catch (InterruptedException | org.apache.bookkeeper.client.api.BKException ee) {
+                        } catch (InterruptedException | BKException ee) {
                             ee.printStackTrace();
                         }
                     } else {
@@ -56,13 +62,22 @@ public class App
                 }
                 );
 
-            ledgerId = writer.get().getId();
-            if (close) {
-                writer.get().close();
+            if (writer == null) {
+                System.out.printf("writer is null\n");
+            } else {
+                WriteHandle w = writer.get();
+                if (w == null) {
+                    System.out.printf("WriteHandle is  null\n");
+                } else {
+                    ledgerId = w.getId();
+                    if (close) {
+                        w.close();
+                    }
+                }
             }
 
             bkClient.close();
-        } catch (InterruptedException | IOException | org.apache.bookkeeper.client.api.BKException | ExecutionException e) {
+        } catch (InterruptedException | IOException | BKException | ExecutionException e) {
             e.printStackTrace();
         }
 
@@ -94,7 +109,7 @@ public class App
             }
 
             bkClient.close();
-        } catch (InterruptedException | IOException | org.apache.bookkeeper.client.api.BKException | ExecutionException e) {
+        } catch (InterruptedException | IOException | BKException | ExecutionException e) {
             e.printStackTrace();
         }
 
@@ -127,7 +142,7 @@ public class App
             reader.close();
 
             bkClient.close();
-        } catch (InterruptedException | IOException | org.apache.bookkeeper.client.api.BKException | ExecutionException e) {
+        } catch (InterruptedException | IOException | BKException | ExecutionException e) {
             e.printStackTrace();
         }
     }
@@ -145,11 +160,11 @@ public class App
                 .execute()
                 .get();
 
-            printCurrentThreadInfo("Main");
+            printCurrentThreadInfo();
 
             CompletableFuture<Long> lastAddConfirmedFuture = reader.readLastAddConfirmedAsync();
-            lastAddConfirmedFuture.thenApplyAsync(lastAdd -> {
-                printCurrentThreadInfo("Future Read Entries");
+            CompletableFuture<Long> thenLastAddConfirmedFuture = lastAddConfirmedFuture.thenApplyAsync(lastAdd -> {
+                printCurrentThreadInfo();
                 try {
                     Iterator<LedgerEntry> entries = reader.read(0, lastAdd).iterator();
                     while (entries.hasNext()) {
@@ -159,7 +174,7 @@ public class App
                                 entry.getEntryId(),
                                 new String(entry.getEntryBytes()));
                     }
-                } catch (InterruptedException | org.apache.bookkeeper.client.api.BKException e) {
+                } catch (InterruptedException | BKException e) {
                     e.printStackTrace();
                 }
 
@@ -170,17 +185,22 @@ public class App
                 return Long.valueOf(-1);
             });
 
+            thenLastAddConfirmedFuture.get();
+
             reader.close();
 
             bkClient.close();
-        } catch (InterruptedException | IOException | org.apache.bookkeeper.client.api.BKException | ExecutionException e) {
+        } catch (InterruptedException | IOException | BKException | ExecutionException e) {
             e.printStackTrace();
         }
     }
     public static void main(String[] args) {
+        /*
         long ledgerId = createAndWriteLedgerWithClose(true);
-        //asyncReadLedger(ledgerId);
-        //long ledgerId = asynCreateAndWriteLedgerWithClose(true);
         readLedger(ledgerId);
+        */
+
+        long ledgerId = asynCreateAndWriteLedgerWithClose(true);
+        asyncReadLedger(ledgerId);
     }
 }

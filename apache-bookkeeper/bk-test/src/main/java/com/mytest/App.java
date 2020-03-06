@@ -30,7 +30,9 @@ public class App
                 " | ID:" + t.getId());
     }
 
-    private static long asynCreateAndWriteLedgerWithClose(boolean close) {
+    private static long asynCreateAndWriteLedgerWithClose(boolean close,
+            int writeCount,
+            int sleepMillis) {
         long ledgerId = -1;
 
         printCurrentThreadInfo();
@@ -51,8 +53,10 @@ public class App
 
                     if (e == null) {
                         try {
-                            w.append("1".getBytes());
-                            w.append("2".getBytes());
+                            for (int i = 0; i < writeCount; ++i) {
+                                w.append(String.valueOf(i).getBytes());
+                                Thread.sleep(sleepMillis);
+                            }
                         } catch (InterruptedException | BKException ee) {
                             ee.printStackTrace();
                         }
@@ -152,55 +156,121 @@ public class App
             ClientConfiguration clientConfig = new ClientConfiguration();
             clientConfig.setMetadataServiceUri(METADATA_SERVICE_URI);
             BookKeeper bkClient = BookKeeper.forConfig(clientConfig).build();
-            ReadHandle reader = bkClient.newOpenLedgerOp()
+            CompletableFuture<ReadHandle> bkReader = bkClient.newOpenLedgerOp()
                 .withLedgerId(ledgerId)
                 .withRecovery(false)
                 .withDigestType(DigestType.MAC)
                 .withPassword("some-password".getBytes())
                 .execute()
-                .get();
+                .thenApplyAsync(reader -> {
+                    System.out.printf("GetLastAddConfirmed: %d\n", reader.getLastAddConfirmed());
 
-            printCurrentThreadInfo();
+                    CompletableFuture<Long> lastAddConfirmedFuture = reader.readLastAddConfirmedAsync();
+                    CompletableFuture<Long> thenLastAddConfirmedFuture = lastAddConfirmedFuture.thenApplyAsync(lastAdd -> {
+                        printCurrentThreadInfo();
+                        try {
+                            System.out.printf("readLastAddConfirmed: %d\n", reader.getLastAddConfirmed());
 
-            CompletableFuture<Long> lastAddConfirmedFuture = reader.readLastAddConfirmedAsync();
-            CompletableFuture<Long> thenLastAddConfirmedFuture = lastAddConfirmedFuture.thenApplyAsync(lastAdd -> {
-                printCurrentThreadInfo();
-                try {
-                    Iterator<LedgerEntry> entries = reader.read(0, lastAdd).iterator();
-                    while (entries.hasNext()) {
-                        LedgerEntry entry = entries.next();
-                        System.out.printf("Successfully async read entry | ledger id:%d | entry id:%d | data:%s\n",
-                                entry.getLedgerId(),
-                                entry.getEntryId(),
-                                new String(entry.getEntryBytes()));
-                    }
-                } catch (InterruptedException | BKException e) {
-                    e.printStackTrace();
+                            Iterator<LedgerEntry> entries = reader.read(0, lastAdd).iterator();
+                            while (entries.hasNext()) {
+                                LedgerEntry entry = entries.next();
+                                System.out.printf("Successfully async read entry | ledger id:%d | entry id:%d | data:%s\n",
+                                        entry.getLedgerId(),
+                                        entry.getEntryId(),
+                                        new String(entry.getEntryBytes()));
+                            }
+                        } catch (InterruptedException | BKException e) {
+                            e.printStackTrace();
+                        }
+
+                        return lastAdd; 
+                    });
+
+                    thenLastAddConfirmedFuture.join();
+
+                    return reader;
                 }
+            );
 
-                return lastAdd; 
-            })
-            .exceptionally(e -> {
-                e.printStackTrace();
-                return Long.valueOf(-1);
-            });
 
-            thenLastAddConfirmedFuture.get();
-
-            reader.close();
+            bkReader.get().close();
 
             bkClient.close();
         } catch (InterruptedException | IOException | BKException | ExecutionException e) {
             e.printStackTrace();
         }
     }
+
+    private static class WriteThread extends Thread {
+        public void run() {
+            long ledgerId = asynCreateAndWriteLedgerWithClose(true, 10, 1000);
+            System.out.printf("Async write ledger is done.");
+        }
+    }
+
+    private static class ReadThread extends Thread {
+        long currentLedgerId;
+
+        public ReadThread(long ledgerId) {
+            currentLedgerId  = ledgerId;
+        }
+
+        public void run() {
+            long ledgerId = asynCreateAndWriteLedgerWithClose(true, 10, 1000);
+            System.out.printf("Async write ledger is done.");
+        }
+
+        /*
+        private pollingTailRead() {
+            try {
+                ClientConfiguration clientConfig = new ClientConfiguration();
+                clientConfig.setMetadataServiceUri(METADATA_SERVICE_URI);
+                BookKeeper bkClient = BookKeeper.forConfig(clientConfig).build();
+                ReadHandle reader = bkClient.newOpenLedgerOp()
+                    .withLedgerId(ledgerId)
+                    .withRecovery(false)
+                    .withDigestType(DigestType.MAC)
+                    .withPassword("some-password".getBytes())
+                    .execute()
+                    .get();
+
+                long lastAdd = reader.readLastAddConfirmed();
+                Iterator<LedgerEntry> entries = reader.read(0, lastAdd).iterator();
+                while (entries.hasNext()) {
+                    LedgerEntry entry = entries.next();
+                    System.out.printf("Successfully read entry | ledger id:%d | entry id:%d | data:%s\n",
+                            entry.getLedgerId(),
+                            entry.getEntryId(),
+                            new String(entry.getEntryBytes()));
+                }
+
+                reader.close();
+
+                bkClient.close();
+            } catch (InterruptedException | IOException | BKException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        */
+    }
+
+    private static void pollingTailRead() {
+        WriteThread writer = new WriteThread();
+        writer.start();
+        try {
+            writer.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         /*
         long ledgerId = createAndWriteLedgerWithClose(true);
         readLedger(ledgerId);
         */
 
-        long ledgerId = asynCreateAndWriteLedgerWithClose(true);
+        long ledgerId = asynCreateAndWriteLedgerWithClose(true, 2, 100);
         asyncReadLedger(ledgerId);
     }
 }

@@ -60,9 +60,17 @@ public class App
 
                     long lId = -1;
                     try {
-                        for (int i = 0; i < writeCount; ++i) {
-                            w.append(String.valueOf(i).getBytes());
-                            Thread.sleep(sleepMillis);
+                        if (-1 == writeCount) {
+                            long id = 0;
+                            while(true) {
+                                w.append(String.valueOf(id++).getBytes());
+                                Thread.sleep(sleepMillis);
+                            }
+                        } else {
+                            for (int i = 0; i < writeCount; ++i) {
+                                w.append(String.valueOf(i).getBytes());
+                                Thread.sleep(sleepMillis);
+                            }
                         }
 
                         lId = w.getId();
@@ -294,6 +302,7 @@ public class App
 
                 while (!reader.isClosed()) {
                     if (nextEntryId > currentLastAdd) {
+                        // 返回最新的LastAddConfirmed和可读的最小的一个entry
                         LastConfirmedAndEntry lastConfAndEntry = reader.readLastAddConfirmedAndEntryAsync(nextEntryId,
                                 1000,
                                 false)
@@ -342,6 +351,11 @@ public class App
         writer.joinAll();
     }
 
+    // 模拟不停地向同一个ledger写数据，然后停掉某一个bookie, 观察在余下的bookies可以/不可以组成一个ensemble时的现象
+    private static void testBookieFail() {
+        long ledgerId = asynCreateAndWriteLedgerWithClose(true, -1, 100, null);
+    }
+
     public static void main(String[] args) {
         /*
         long ledgerId = createAndWriteLedgerWithClose(true);
@@ -349,8 +363,10 @@ public class App
 
         long ledgerId = asynCreateAndWriteLedgerWithClose(true, 2, 100, null);
         asyncReadLedger(ledgerId);
-        */
 
         pollingTailRead();
+        */
+        
+        testBookieFail();
     }
 }

@@ -356,17 +356,24 @@ public class App
         long ledgerId = asynCreateAndWriteLedgerWithClose(true, -1, 100, null);
     }
 
+    // 在读写ledger时，kill掉当前ensemble中的一个bookie, 然后观察是否新建了一个segment, 作为ensemeble change, 最后读写都正常
+    private static void testWriteAndReadWhenBookieDown() {
+        long ledgerId = asynCreateAndWriteLedgerWithClose(true, 20, 1000, null);
+        asyncReadLedger(ledgerId);
+    }
+
     public static void main(String[] args) {
         /*
         long ledgerId = createAndWriteLedgerWithClose(true);
         readLedger(ledgerId);
 
-        long ledgerId = asynCreateAndWriteLedgerWithClose(true, 2, 100, null);
-        asyncReadLedger(ledgerId);
 
         pollingTailRead();
-        */
         
         testBookieFail();
+
+        testReadWhenBookieDown(88);
+        */
+        testWriteAndReadWhenBookieDown();
     }
 }

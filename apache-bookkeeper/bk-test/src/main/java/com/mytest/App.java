@@ -208,10 +208,12 @@ public class App
 
     private static class WriteThread extends Thread {
         private ReadThread reader;
+        private boolean isRecoverMode;
 
-        public WriteThread() {
+        public WriteThread(boolean isRecover) {
             super();
             reader = new ReadThread();
+            isRecoverMode = isRecover;
         }
 
         public void run() {
@@ -219,6 +221,7 @@ public class App
                     100,
                     100,
                     (ledgerId) -> {
+                        reader.setRecover(isRecoverMode);
                         reader.setLedgerId(ledgerId);
                         reader.start();
                     });
@@ -237,9 +240,14 @@ public class App
 
     private static class ReadThread extends Thread {
         long currentLedgerId;
+        boolean isRecover;
 
         public void setLedgerId(long ledgerId) {
             currentLedgerId = ledgerId;
+        }
+
+        public void setRecover(boolean recover) {
+            isRecover = recover;
         }
 
         public void run() {
@@ -288,7 +296,7 @@ public class App
                 BookKeeper bkClient = BookKeeper.forConfig(clientConfig).build();
                 ReadHandle reader = bkClient.newOpenLedgerOp()
                     .withLedgerId(currentLedgerId)
-                    .withRecovery(false)
+                    .withRecovery(isRecover)
                     .withDigestType(DigestType.MAC)
                     .withPassword("some-password".getBytes())
                     .execute()
@@ -345,8 +353,14 @@ public class App
         }
     }
 
-    private static void pollingTailRead() {
-        WriteThread writer = new WriteThread();
+    private static void testPollingTailRead() {
+        WriteThread writer = new WriteThread(false);
+        writer.start();
+        writer.joinAll();
+    }
+
+    private static void testRecoveryRead() {
+        WriteThread writer = new WriteThread(true);
         writer.start();
         writer.joinAll();
     }
@@ -368,12 +382,13 @@ public class App
         readLedger(ledgerId);
 
 
-        pollingTailRead();
         
         testBookieFail();
 
         testReadWhenBookieDown(88);
-        */
         testWriteAndReadWhenBookieDown();
+        testPollingTailRead();
+        */
+        testRecoveryRead();
     }
 }

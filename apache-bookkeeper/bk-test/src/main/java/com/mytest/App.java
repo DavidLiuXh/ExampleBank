@@ -305,44 +305,51 @@ public class App
                 long lastAdd = -1;
                 long batchReadSize = 10;
                 long nextEntryId = 0;
-                long currentLastAdd = reader.getLastAddConfirmed();
+                long currentLastAdd = -1;
                 System.out.printf("Successfully xxx | last add:%d \n", currentLastAdd);
 
-                while (!reader.isClosed()) {
-                    if (nextEntryId > currentLastAdd) {
-                        // 返回最新的LastAddConfirmed和可读的最小的一个entry
-                        LastConfirmedAndEntry lastConfAndEntry = reader.readLastAddConfirmedAndEntryAsync(nextEntryId,
-                                1000,
-                                false)
+                //isClosed用于判断ledger是否被关闭，而不是当前的reader是否close
+                while (!reader.isClosed() ||
+                    reader.getLastAddConfirmed() >= nextEntryId) {
+                  currentLastAdd = reader.getLastAddConfirmed();
+
+                  if (nextEntryId > currentLastAdd) {
+                    // 返回最新的LastAddConfirmed和可读的最小的一个entry
+                    LastConfirmedAndEntry lastConfAndEntry = reader.readLastAddConfirmedAndEntryAsync(nextEntryId,
+                        1000,
+                        false)
                             .get();
                         if (null != lastConfAndEntry &&
                                 lastConfAndEntry.hasEntry()) {
-                            currentLastAdd = lastConfAndEntry.getLastAddConfirmed();
                             LedgerEntry entry = lastConfAndEntry.getEntry();
                             ++nextEntryId;
 
                             System.out.printf("Successfully async read entry | ledger id:%d | entry id:%d | last add:%d |  data:%s\n",
                                     entry.getLedgerId(),
-                                    entry.getEntryId(),
+                                    currentLastAdd,
                                     lastConfAndEntry.getLastAddConfirmed(),
                                     new String(entry.getEntryBytes()));
-                                } else {
-                                    continue;
-                                }
-                    } else {
-                        long currentReadEnd = Math.min(currentLastAdd, nextEntryId + batchReadSize);
-                        Iterator<LedgerEntry> entries = reader.read(nextEntryId, currentReadEnd).iterator();
-                        while (entries.hasNext()) {
-                            LedgerEntry entry = entries.next();
-                            System.out.printf("Successfully batch async read entry | ledger id:%d | entry id:%d | data:%s\n",
-                                    entry.getLedgerId(),
-                                    entry.getEntryId(),
-                                    new String(entry.getEntryBytes()));
+                        } else {
+                          continue;
                         }
+                    } else {
+                      long currentReadEnd = Math.min(currentLastAdd, nextEntryId + batchReadSize - 1);
+                      Iterator<LedgerEntry> entries = reader.read(nextEntryId, currentReadEnd).iterator();
+                      while (entries.hasNext()) {
+                        LedgerEntry entry = entries.next();
+                        System.out.printf("Successfully batch async read entry | current read end:%d | ledger id:%d | entry id:%d | data:%s | currentLastAdd:%d \n",
+                            currentReadEnd,
+                            entry.getLedgerId(),
+                            entry.getEntryId(),
+                            new String(entry.getEntryBytes()),
+                            currentLastAdd);
+                      }
 
-                        nextEntryId = currentReadEnd + 1;
+                      nextEntryId = currentReadEnd + 1;
                     }
                 }
+
+                System.out.printf("xxxxxxxx | reader close\n");
 
                 reader.close();
 
@@ -388,7 +395,8 @@ public class App
         testReadWhenBookieDown(88);
         testWriteAndReadWhenBookieDown();
         testPollingTailRead();
-        */
         testRecoveryRead();
+        */
+        testPollingTailRead();
     }
 }

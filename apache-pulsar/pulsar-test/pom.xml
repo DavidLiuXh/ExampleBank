@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.mytest</groupId>
+  <artifactId>pulsar-test</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>pulsar-test</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <bookkeeper.version>4.10.0</bookkeeper.version>
+    <bookkeeper.localpath>/home/lw/opensource/bookkeeper-${bookkeeper.version}</bookkeeper.localpath>
+    <pulsar.version>2.5.0</pulsar.version>
+    <pulsar.localpath>/home/lw/opensource/apache-pulsar-${pulsar.version}/distribution/server/target/apache-pulsar-${pulsar.version}/lib</pulsar.localpath>
+  </properties>
+
+  <dependencies>
+     <dependency>  
+      <groupId>org.apache.bookkeeper</groupId>
+      <artifactId>bookkeeper-server</artifactId>
+      <version>${bookkeeper.version}</version>
+      <!--如果使用mvn库中的jar包，注释掉下面两行即可-->
+      <scope>system</scope>  
+      <systemPath>${bookkeeper.localpath}/bookkeeper-server/target/bookkeeper-server-${bookkeeper.version}.jar</systemPath>  
+    </dependency>
+     <dependency>  
+      <groupId>org.apache.bookkeeper</groupId>
+      <artifactId>bookkeeper-stats-api</artifactId>
+      <version>${bookkeeper.version}</version>
+      <scope>system</scope>  
+      <systemPath>${bookkeeper.localpath}/bookkeeper-stats/target/bookkeeper-stats-api-${bookkeeper.version}.jar</systemPath>  
+    </dependency>
+     <dependency>  
+      <groupId>org.apache.bookkeeper</groupId>
+      <artifactId>bookkeeper-common</artifactId>
+      <version>${bookkeeper.version}</version>
+      <scope>system</scope>  
+      <systemPath>${bookkeeper.localpath}/bookkeeper-common/target/bookkeeper-common-${bookkeeper.version}.jar</systemPath>  
+    </dependency>
+     <dependency>  
+      <groupId>org.apache.bookkeeper</groupId>
+      <artifactId>bookkeeper-common-allocator-${bookkeeper.version}.jar</artifactId>
+      <version>${bookkeeper.version}</version>
+      <scope>system</scope>  
+      <systemPath>${bookkeeper.localpath}/bookkeeper-common-allocator/target/bookkeeper-common-allocator-${bookkeeper.version}.jar</systemPath>  
+    </dependency>
+     <dependency>  
+      <groupId>org.apache.bookkeeper</groupId>
+      <artifactId>bookkeeper-proto</artifactId>
+      <version>${bookkeeper.version}</version>
+      <scope>system</scope>  
+      <systemPath>${bookkeeper.localpath}/bookkeeper-proto/target/bookkeeper-proto-${bookkeeper.version}.jar</systemPath>  
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>  
+      <groupId>org.apache.pulsar</groupId>
+      <artifactId>pulsar-client</artifactId>
+      <version>${pulsar.version}</version>
+      <!--如果使用mvn库中的jar包，注释掉下面两行即可-->
+      <scope>system</scope>  
+      <systemPath>${pulsar.localpath}/org.apache.pulsar-pulsar-client-original-${pulsar.version}.jar</systemPath>  
+    </dependency>
+    <dependency>  
+      <groupId>org.apache.pulsar</groupId>
+      <artifactId>pulsar-client-api</artifactId>
+      <version>${pulsar.version}</version>
+      <!--如果使用mvn库中的jar包，注释掉下面两行即可-->
+      <scope>system</scope>  
+      <systemPath>${pulsar.localpath}/org.apache.pulsar-pulsar-client-api-${pulsar.version}.jar</systemPath>  
+    </dependency>
+    <dependency>  
+      <groupId>org.apache.pulsar</groupId>
+      <artifactId>pulsar-common</artifactId>
+      <version>${pulsar.version}</version>
+      <!--如果使用mvn库中的jar包，注释掉下面两行即可-->
+      <scope>system</scope>  
+      <systemPath>${pulsar.localpath}/org.apache.pulsar-pulsar-common-${pulsar.version}.jar</systemPath>  
+    </dependency>
+
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-codec-http</artifactId>
+      <version>4.1.43.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-resolver-dns</artifactId>
+      <version>4.1.43.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.25</version>
+    </dependency>
+    <dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-simple</artifactId>
+      <version>1.7.25</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.10</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.yahoo.datasketches</groupId>
+      <artifactId>sketches-core</artifactId>
+    <version>0.8.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    <version>2.8.2</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+        <version>4.5.5</version>
+    </dependency>
+
+    <!--Schema dependencies-->
+
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+    <version>1.8.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>3.5.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-jsonSchema</artifactId>
+    <version>2.10.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+    <version>2.10.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>net.jcip</groupId>
+      <artifactId>jcip-annotations</artifactId>
+    <version>1.0</version>
+    </dependency>
+    
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpkix-jdk15on</artifactId>
+        <version>1.60</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-ext-jdk15on</artifactId>
+        <version>1.60</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+    <version>25.1-jre</version>
+      </dependency>
+    <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-all</artifactId>
+        <version>4.1.46.Final</version>
+    </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.4</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>2.6</version>
+      </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+        <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.7.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

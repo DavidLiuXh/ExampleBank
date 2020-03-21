@@ -4,6 +4,13 @@
   * PULSAR_ROUTING_APPENDER_DEFAULT=RollingFile
  
 * broker.conf
+   * zookeeperServers
+   * configurationStoreServers
+       bookkeeper所使用的zk
+   * brokerServicePort
+      对外的二进制协议交互端口
+   * webServicePort
+      对外的http服务端口
    * brokerDeleteInactiveTopicsEnabled=true
       默认自动删除不活动的topic
    * brokerDeleteInactiveTopicsFrequencySeconds=60

@@ -17,9 +17,9 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <bookkeeper.version>4.10.0</bookkeeper.version>
-    <bookkeeper.localpath>/home/lw/opensource/bookkeeper-${bookkeeper.version}</bookkeeper.localpath>
+    <bookkeeper.localpath>/home/lw/opensources/bookkeeper-${bookkeeper.version}</bookkeeper.localpath>
     <pulsar.version>2.5.0</pulsar.version>
-    <pulsar.localpath>/home/lw/opensource/apache-pulsar-${pulsar.version}/distribution/server/target/apache-pulsar-${pulsar.version}/lib</pulsar.localpath>
+    <pulsar.localpath>/home/lw/opensources/apache-pulsar-${pulsar.version}/distribution/server/target/apache-pulsar-${pulsar.version}/lib</pulsar.localpath>
   </properties>
 
   <dependencies>
@@ -80,6 +80,14 @@
       <!--如果使用mvn库中的jar包，注释掉下面两行即可-->
       <scope>system</scope>  
       <systemPath>${pulsar.localpath}/org.apache.pulsar-pulsar-client-api-${pulsar.version}.jar</systemPath>  
+    </dependency>
+    <dependency>  
+      <groupId>org.apache.pulsar</groupId>
+      <artifactId>protobuf-shaded</artifactId>
+      <version>${pulsar.version}</version>
+      <!--如果使用mvn库中的jar包，注释掉下面两行即可-->
+      <scope>system</scope>  
+      <systemPath>${pulsar.localpath}/org.apache.pulsar-protobuf-shaded-2.1.0-incubating.jar</systemPath>  
     </dependency>
     <dependency>  
       <groupId>org.apache.pulsar</groupId>

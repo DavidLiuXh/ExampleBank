@@ -2,7 +2,7 @@
  1. bookiePort
  2. advertisedAddress
  3. httpServerPort
- 4. journalDirecttories
+ 4. journalDirectories
  5. ledgerDirectories
  6. indexDirectories
  7. metadataServiceUri

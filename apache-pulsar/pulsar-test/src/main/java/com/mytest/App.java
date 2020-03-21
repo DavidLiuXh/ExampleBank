@@ -11,7 +11,7 @@ import org.apache.pulsar.client.api.PulsarClientException;
  *
  */
 public class App {
-  private static String SERVICE_URI = "pulsar://10.0.2.15:6650,10.0.2.15:6651,10.0.2.15:6652";
+  private static String SERVICE_URI = "pulsar://10.173.229.17:6650,10.173.220.191:6650,10.173.220.190:6650";
 
   private static boolean kStop = false;
 
@@ -68,9 +68,11 @@ public class App {
 
   private static class SimpleProduceThread extends Thread {
     private String topic;
+    private long msgCount;
 
-    public SimpleProduceThread(String topic) {
+    public SimpleProduceThread(String topic, long msgCount) {
       this.topic = topic;
+      this.msgCount = msgCount;
     }
 
     public void run() {
@@ -84,8 +86,14 @@ public class App {
           .create();
 
         int i = 0;
-        while (!kStop) {
-          producer.send(String.valueOf(++i).getBytes());
+        if (msgCount > 0) {
+          for (long j = 0; j < msgCount; ++j) {
+            producer.send(String.valueOf(j).getBytes());
+          }
+        } else {
+          while (!kStop) {
+            producer.send(String.valueOf(++i).getBytes());
+          }
         }
 
         producer.close();
@@ -135,16 +143,25 @@ public class App {
     }
   }
 
-  private static void SimpleProduceAndConsume(String topic) {
-    SimpleProduceThread producer = new SimpleProduceThread(topic);
+  private static void SimpleProduceAndConsume(String topic,
+      long msgCount,
+      boolean notConsume,
+      boolean notProduce) {
+    SimpleProduceThread producer = new SimpleProduceThread(topic, msgCount);
     producer.start();
 
-    SimpleConsumeThread consumer = new SimpleConsumeThread(topic);
-    consumer.start();
+    SimpleConsumeThread consumer = null;
+    if (!notConsume) {
+      consumer = new SimpleConsumeThread(topic);
+      consumer.start();
+    }
 
     try {
       producer.join();
-      consumer.join();
+
+      if (!notConsume) {
+        consumer.join();
+      }
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
@@ -162,10 +179,12 @@ public class App {
   }
 
   public static void main( String[] args ) {
+    System.out.printf("topic:%s\n", args[0]);
+
     Runtime.getRuntime().addShutdownHook(new ExitHandler());
 
     //SimpleProduceMsg("my-pulsar-1");
-    //SimpleConsumeMsg("my-pulsar-1");
-    SimpleProduceAndConsume("my-pulsar-1");
+   // SimpleConsumeMsg(args[0]);
+    SimpleProduceAndConsume(args[0], 10, false, false);
   }
 }

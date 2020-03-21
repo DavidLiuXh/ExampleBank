@@ -1,2 +1,4 @@
 * 主要是用来设置log相关
-  * PULSAR_LOG_DIR=/log/pulsar/p1                                                                                                                                          * PULSAR_LOG_APPENDER=RollingFile                                                                                                                                        * PULSAR_ROUTING_APPENDER_DEFAULT=RollingFile
+  * PULSAR_LOG_DIR=/log/pulsar/p1                                                                                                                                         
+  * PULSAR_LOG_APPENDER=RollingFile                                                                                                                                       
+  * PULSAR_ROUTING_APPENDER_DEFAULT=RollingFile

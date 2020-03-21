@@ -4,6 +4,7 @@
   * PULSAR_ROUTING_APPENDER_DEFAULT=RollingFile
  
 * broker.conf
+   * clusterName
    * zookeeperServers
    * configurationStoreServers : bookkeeper所使用的zk
    * brokerServicePort : 对外的二进制协议交互端口

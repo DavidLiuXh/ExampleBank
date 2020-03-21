@@ -5,13 +5,8 @@
  
 * broker.conf
    * zookeeperServers
-   * configurationStoreServers
-       bookkeeper所使用的zk
-   * brokerServicePort
-      对外的二进制协议交互端口
-   * webServicePort
-      对外的http服务端口
-   * brokerDeleteInactiveTopicsEnabled=true
-      默认自动删除不活动的topic
-   * brokerDeleteInactiveTopicsFrequencySeconds=60
-      默认60s检查一次是不是有inactive的topic
+   * configurationStoreServers : bookkeeper所使用的zk
+   * brokerServicePort : 对外的二进制协议交互端口
+   * webServicePort :  对外的http服务端口
+   * brokerDeleteInactiveTopicsEnabled=true : 默认自动删除不活动的topic
+   * brokerDeleteInactiveTopicsFrequencySeconds=60 : 默认60s检查一次是不是有inactive的topic

@@ -1,5 +1,9 @@
 package com.mytest;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.Condition;
+
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.Consumer;
@@ -14,6 +18,9 @@ public class App {
   private static String SERVICE_URI = "pulsar://10.173.229.17:6650,10.173.220.191:6650,10.173.220.190:6650";
 
   private static boolean kStop = false;
+
+  private static Lock produceAndConsumeLock = new ReentrantLock();
+  private static Condition produceAndConsumeCondition = produceAndConsumeLock.newCondition(); 
 
   private static void SimpleProduceMsg(String topic) {
     try {
@@ -122,6 +129,13 @@ public class App {
           .subscriptionName("my-subscription")
           .subscribe();
 
+        try {
+          produceAndConsumeLock.lock();
+          produceAndConsumeCondition.signal();
+        } finally {
+          produceAndConsumeLock.unlock();
+        }
+
         while(!kStop) {
           Message msg = consumer.receive();
 
@@ -147,14 +161,23 @@ public class App {
       long msgCount,
       boolean notConsume,
       boolean notProduce) {
-    SimpleProduceThread producer = new SimpleProduceThread(topic, msgCount);
-    producer.start();
-
     SimpleConsumeThread consumer = null;
     if (!notConsume) {
       consumer = new SimpleConsumeThread(topic);
       consumer.start();
+
+      try {
+        produceAndConsumeLock.lock();
+        produceAndConsumeCondition.await();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      } finally {
+        produceAndConsumeLock.unlock();
+      }
     }
+
+    SimpleProduceThread producer = new SimpleProduceThread(topic, msgCount);
+    producer.start();
 
     try {
       producer.join();

@@ -3,6 +3,9 @@ package com.mytest;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Condition;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.Producer;
@@ -41,7 +44,8 @@ public class App {
     }
   }
 
-  private static void SimpleConsumeMsg(String topic) {
+  private static void SimpleConsumeMsg(String topic,
+      boolean ack) {
     try {
       PulsarClient client = PulsarClient.builder()
         .serviceUrl(SERVICE_URI)
@@ -52,17 +56,20 @@ public class App {
         .subscriptionName("my-subscription")
         .subscribe();
 
-      int i = 0;
-      while(++i < 2) {
+      while(!kStop) {
         Message msg = consumer.receive();
 
         try {
           System.out.printf("Message received: %s\n", new String(msg.getData()));
-          
-          consumer.acknowledge(msg);
+
+          if (ack) {
+            consumer.acknowledge(msg);
+          }
         } catch (Exception e) {
           // Message failed to process, redeliver later
-          consumer.negativeAcknowledge(msg);
+          if (ack) {
+            consumer.negativeAcknowledge(msg);
+          }
         }
       }
 
@@ -157,6 +164,7 @@ public class App {
     }
   }
 
+  // test producer is together with cosumer
   private static void SimpleProduceAndConsume(String topic,
       long msgCount,
       boolean notConsume,
@@ -190,6 +198,28 @@ public class App {
     }
   }
 
+  private static void FirstProduceThanConsume(String topic,
+      long msgCount) {
+    SimpleProduceThread producer = new SimpleProduceThread(topic, msgCount);
+    producer.start();
+
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
+    SimpleConsumeThread consumer = new SimpleConsumeThread(topic);
+    consumer.start();
+
+    try {
+      producer.join();
+      consumer.join();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
   private static class ExitHandler extends Thread {
     public ExitHandler() {
       super("Exit Handler");
@@ -201,13 +231,82 @@ public class App {
     }
   }
 
+  // test backlog policy
+  // ./pulsar-admin namespaces set-backlog-quota --limit 100000 --policy producer_exception my-tenants-1/my-namespace-1
+  // http://pulsar.apache.org/docs/en/admin-api-namespaces/
+  private static void ConcurrentProduce(String topic,
+      int concurrent,
+      int msgCount,
+      boolean notConsume) {
+    List<Thread> threadList = new ArrayList(2);
+
+    Thread consume = null;
+    if (!notConsume) {
+      consume = new Thread(() -> {
+        SimpleConsumeMsg(topic, false);
+      });
+      consume.start();
+    }
+
+    for (int i = 0; i < concurrent; ++i) {
+      Thread t = new Thread(() -> {
+        try {
+          PulsarClient client = PulsarClient.builder()
+            .serviceUrl(SERVICE_URI)
+            .build();
+
+          Producer<byte[]> producer = client.newProducer()
+            .topic(topic)
+            .create();
+
+          if (msgCount > 0) {
+            for (long j = 0; j < msgCount; ++j) {
+              producer.send(String.valueOf(j).getBytes());
+            }
+          } else {
+            int k = 0;
+            while (!kStop) {
+              producer.send(String.valueOf(++k).getBytes());
+            }
+          }
+
+          producer.close();
+          client.close();
+        } catch (PulsarClientException e) {
+          e.printStackTrace();
+        }
+      });
+
+      threadList.add(t);
+
+      t.start();
+    }
+
+    try {
+      Iterator<Thread> it = threadList.iterator();
+      while (it.hasNext()) {
+        Thread t = it.next();
+        t.join();
+      }
+
+      if (!notConsume) {
+        consume.join();
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
   public static void main( String[] args ) {
     System.out.printf("topic:%s\n", args[0]);
 
     Runtime.getRuntime().addShutdownHook(new ExitHandler());
 
     //SimpleProduceMsg("my-pulsar-1");
-   // SimpleConsumeMsg(args[0]);
-    SimpleProduceAndConsume(args[0], 10, false, false);
+    //SimpleConsumeMsg(args[0], true);
+    //SimpleProduceAndConsume(args[0], 10, false, false);
+    //FirstProduceThanConsume(args[0], 10);
+
+    ConcurrentProduce(args[0], 10, 1000, false);
   }
 }

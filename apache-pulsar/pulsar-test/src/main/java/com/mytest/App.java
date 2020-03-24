@@ -12,6 +12,7 @@ import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Message;
 import org.apache.pulsar.client.api.PulsarClientException;
+import org.apache.pulsar.client.api.PulsarClientException.ProducerBlockedQuotaExceededException;
 
 /**
  * Hello world!
@@ -19,6 +20,7 @@ import org.apache.pulsar.client.api.PulsarClientException;
  */
 public class App {
   private static String SERVICE_URI = "pulsar://10.173.229.17:6650,10.173.220.191:6650,10.173.220.190:6650";
+  //private static String SERVICE_URI = "pulsar://10.0.2.15:6650,10.0.2.15:6651,10.0.2.15:6652";
 
   private static boolean kStop = false;
 
@@ -234,6 +236,8 @@ public class App {
   // test backlog policy
   // ./pulsar-admin namespaces set-backlog-quota --limit 100000 --policy producer_exception my-tenants-1/my-namespace-1
   // http://pulsar.apache.org/docs/en/admin-api-namespaces/
+  // 在Create Producer和 send时都可能抛出ProducerBlockedQuotaExceededException
+  // send中抛出时，如果调整吧 limit，send可以恢复，不用重启producer
   private static void ConcurrentProduce(String topic,
       int concurrent,
       int msgCount,
@@ -255,23 +259,52 @@ public class App {
             .serviceUrl(SERVICE_URI)
             .build();
 
-          Producer<byte[]> producer = client.newProducer()
-            .topic(topic)
-            .create();
+          Producer<byte[]> producer = null; 
+          while (!kStop) {
+            try {
+              producer = client.newProducer()
+                .topic(topic)
+                .create();
+              break;
+            } catch (ProducerBlockedQuotaExceededException e) {
+              try {
+                Thread.sleep(1000);
+              } catch (InterruptedException ee) {
+                ee.printStackTrace();
+              }
 
-          if (msgCount > 0) {
-            for (long j = 0; j < msgCount; ++j) {
-              producer.send(String.valueOf(j).getBytes());
+              e.printStackTrace();
             }
-          } else {
-            int k = 0;
-            while (!kStop) {
-              producer.send(String.valueOf(++k).getBytes());
+          }
+
+          if (producer != null) {
+            if (msgCount > 0) {
+              for (long j = 0; j < msgCount; ++j) {
+                try {
+                  producer.send(String.valueOf(j).getBytes());
+                } catch (PulsarClientException.ProducerBlockedQuotaExceededException e) {
+                  try {
+                    Thread.sleep(1000);
+                  } catch (InterruptedException ee) {
+                    ee.printStackTrace();
+                  }
+                  e.printStackTrace();
+                } catch (PulsarClientException e) {
+                  e.printStackTrace();
+                }
+              }
+            } else {
+              int k = 0;
+              while (!kStop) {
+                producer.send(String.valueOf(++k).getBytes());
+              }
             }
           }
 
           producer.close();
           client.close();
+        } catch (PulsarClientException.ProducerBlockedQuotaExceededException e) {
+          e.printStackTrace();
         } catch (PulsarClientException e) {
           e.printStackTrace();
         }
@@ -307,6 +340,6 @@ public class App {
     //SimpleProduceAndConsume(args[0], 10, false, false);
     //FirstProduceThanConsume(args[0], 10);
 
-    ConcurrentProduce(args[0], 10, 1000, false);
+    ConcurrentProduce(args[0], 10, 10000, false);
   }
 }

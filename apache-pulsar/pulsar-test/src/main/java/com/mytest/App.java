@@ -11,8 +11,10 @@ import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Message;
+import org.apache.pulsar.client.api.MessageId;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.api.PulsarClientException.ProducerBlockedQuotaExceededException;
+import org.apache.pulsar.client.api.PulsarClientException.ConsumerBusyException;
 
 /**
  * Hello world!
@@ -57,6 +59,8 @@ public class App {
         .topic(topic)
         .subscriptionName("my-subscription")
         .subscribe();
+
+      consumer.seek(MessageId.earliest);
 
       while(!kStop) {
         Message msg = consumer.receive();
@@ -122,9 +126,11 @@ public class App {
 
   private static class SimpleConsumeThread extends Thread {
     private String topic;
+    private boolean isEarliest;
 
-    public SimpleConsumeThread(String topic) {
+    public SimpleConsumeThread(String topic, boolean earliest) {
       this.topic = topic;
+      this.isEarliest = earliest;
     }
 
     public void run() {
@@ -133,10 +139,24 @@ public class App {
           .serviceUrl(SERVICE_URI)
           .build();
 
-        Consumer consumer = client.newConsumer()
-          .topic(topic)
-          .subscriptionName("my-subscription")
-          .subscribe();
+        Consumer consumer = null;
+        try {
+          consumer = client.newConsumer()
+            .topic(topic)
+            .subscriptionName("my-subscription")
+            .subscribe();
+        } catch (ConsumerBusyException e) {
+          e.printStackTrace();
+          return;
+        }
+
+        /*
+        if (isEarliest) {
+          consumer.seek(MessageId.earliest);
+        } else {
+          consumer.seek(MessageId.latest);
+        }
+        */
 
         try {
           produceAndConsumeLock.lock();
@@ -149,7 +169,9 @@ public class App {
           Message msg = consumer.receive();
 
           try {
-            System.out.printf("Message received: %s\n", new String(msg.getData()));
+            System.out.printf("Thread id:%s | Message received: %s\n",
+                Thread.currentThread().getName(),
+                new String(msg.getData()));
 
             consumer.acknowledge(msg);
           } catch (Exception e) {
@@ -173,7 +195,7 @@ public class App {
       boolean notProduce) {
     SimpleConsumeThread consumer = null;
     if (!notConsume) {
-      consumer = new SimpleConsumeThread(topic);
+      consumer = new SimpleConsumeThread(topic, false);
       consumer.start();
 
       try {
@@ -206,17 +228,30 @@ public class App {
     producer.start();
 
     try {
-      Thread.sleep(1000);
+      Thread.sleep(10000);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
 
-    SimpleConsumeThread consumer = new SimpleConsumeThread(topic);
+    SimpleConsumeThread consumer = new SimpleConsumeThread(topic, true);
     consumer.start();
 
+    /*
     try {
-      producer.join();
+      Thread.sleep(5000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    */
+  
+    //Exclusive sub: Received error from server: Exclusive consumer is already connected
+    SimpleConsumeThread consumer1 = new SimpleConsumeThread(topic, true);
+    consumer1.start();
+
+    try {
+      //producer.join();
       consumer.join();
+    //  consumer1.join();
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
@@ -335,11 +370,11 @@ public class App {
 
     Runtime.getRuntime().addShutdownHook(new ExitHandler());
 
-    //SimpleProduceMsg("my-pulsar-1");
+    //SimpleProduceMsg(args[0]);
     //SimpleConsumeMsg(args[0], true);
-    //SimpleProduceAndConsume(args[0], 10, false, false);
-    //FirstProduceThanConsume(args[0], 10);
+    //SimpleProduceAndConsume(args[0], 100, false, false);
+    FirstProduceThanConsume(args[0], 10);
 
-    ConcurrentProduce(args[0], 10, 10000, false);
+    //ConcurrentProduce(args[0], 10, 10000, false);
   }
 }

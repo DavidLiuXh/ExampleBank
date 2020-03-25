@@ -6,4 +6,5 @@
  * Partitioned topic
     * 如果生产时的Msg没有提供Key, 切使用 RoundRobinPartition 策略，则消费时不能保证顺序
     * 如果希望保证消费的Msg顺序
-       * Msg附带key
+       * Msg附带key, 相同key的Msg被hash到相同的partition(即子topic)上；
+       * 使用非Partitioned topic, 消费时使用非shard方式；若使用shard方式，可考虑用shard_Key方式; 

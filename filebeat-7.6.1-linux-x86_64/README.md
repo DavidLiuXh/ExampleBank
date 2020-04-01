@@ -13,14 +13,9 @@
   ```
   filebeat.config.inputs:
   enable: true
-# Glob pattern for configuration loading
-path: inputs.d/*.yml
-
-# Set to true to enable config reloading
-reload.enabled: true 
-
-# Period on which files under path should be checked for changes
-reload.period: 10s
+  path: inputs.d/*.yml
+  reload.enabled: true
+  reload.period: 10s
   ```
 * 收集的不同日志发送到不同的topic
   * 在input配置中添加`fileds`:
@@ -28,6 +23,5 @@ reload.period: 10s
   fileds:
     log_topic: topic_name
   ```
-  * 在output.kafka中指定：`topic: '%{[fields.log_topic]}''
-  }'`
+  * 在output.kafka中指定：`topic: '%{[fields.log_topic]}'`
   

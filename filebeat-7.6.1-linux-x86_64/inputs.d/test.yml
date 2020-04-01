@@ -1,0 +1,44 @@
+- type: log
+
+  # Change to true to enable this input configuration.
+  enabled: true 
+
+  # Paths that should be crawled and fetched. Glob based paths.
+  paths:
+    - /home/lw/test/filebeat/*.log
+
+  fields:
+    key1: value1
+    key2: value2
+    log_topic: lw_filebeat_t_2
+
+    #fields_under_root: true
+
+- type: log
+
+  # Change to true to enable this input configuration.
+  enabled: true 
+
+  # Paths that should be crawled and fetched. Glob based paths.
+  paths:
+    - /home/lw/test/filebeat/*.test
+
+  fields:
+    log_topic: lw_filebeat_t_2
+- type: log
+
+  # Change to true to enable this input configuration.
+  enabled: true 
+
+  # Paths that should be crawled and fetched. Glob based paths.
+  paths:
+    - /home/lw/test/filebeat/*.xxx
+
+- type: log
+
+  # Change to true to enable this input configuration.
+  enabled: true 
+
+  # Paths that should be crawled and fetched. Glob based paths.
+  paths:
+    - /home/lw/test/filebeat/*.yyy

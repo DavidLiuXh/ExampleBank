@@ -1,6 +1,6 @@
 [toc]
 
-####  Epoll在使用中的几点问题总结
+####  Socket编程中的几点问题总结
 
 #####  epoll_ctl中 epoll_event参数设置
 
@@ -69,6 +69,54 @@
      ```
 
      `Broker pipie`这个异常，说到底是应用层没有对相应的fd在收到对端关闭通知时，作正确的处理所致，它并不是tcp/ip通讯层面的问题。
+
+  4. 下图可以看到发送了`FIN`包
+
+  ![](/home/lw/图片/tcp_fin.png)
+  *  对端close（kill, kill -9）时，如果接收缓冲区内还有数据，不会发送`FIN`包，而是发送`RST`,此时本端：
+
+    1. 收到`RST`后的第一次写操作，写失败，errno = 104,  Connection reset by peer; 之后将触发下列事件：
+
+       ```
+       EPOLLIN
+       EPOLLOUT
+       EPOLLHUP
+       EPOLLRDHUP（需要主动在epoll_ctal时加入events）
+       ```
+
+       
+
+    2. 收到`RST`后的第二次及后序的写操作，写失败，在忽略了`SIGPIPE`后，erron =32, Broken pipe；
+
+    3. 收到`RST`后的读操作：errno = 104,  Connection reset by peer
+
+    4. 下面可以看到发送了`RST`包：
+
+![](/home/lw/图片/tcp_rst.png)
+
+##### 阻塞与非阻塞
+
+* 针对Epoll的`LT`模式，socket fd可以设置成阻塞也可以设置成非阻塞；
+* 针对Epoll的`ET`模式，socket fd只能设置成非阻塞；
+  1. ET状态有变化才触发，因此在收数据时必须循环读取，收尽当前可收数据。因为不知道下一次调用`read`时还有没有数据，一旦没有数据，又没有用非阻塞方式，则将一直阻塞在`read`调用上；
+  2. 当然如果在`LT`模式下也每次循环读取，也有类似的问题；
+  3. 采用非阻塞循环读取方式时，如果当前socket fd上恰好有持续大数据量写入，则这个循环读取可能持续较长时间，从而导致其他socket fd上的读写操作将被延迟。针对这种情况，我们只能是控制当前socket fd上的读操作，并将其保存，在下一次event loop中不依赖`ET`的触发，直接针对保存的fd继续其读操作。
+
+##### close行为
+
+* close时，如果接收缓冲区还有数据未read到应用层，则不会走四次挥手流程，直接发`RST`包，这个前面已经介绍过；
+
+* close时，如果发送缓冲区还有数据未发送，close立即返回，系统接管这个socket, 将尽力将发送缓冲区数据到对端，然后走发送`FIN`包；
+
+* 使用`SO_LINGER`改变`close`默认行为：
+
+  通过`struct linger`设置
+
+  | linger.l_onoff | linger.l_linger | close行为                                                    | kernel行为                                                | 备注 |
+  | -------------- | --------------- | ------------------------------------------------------------ | --------------------------------------------------------- | ---- |
+  | 0 为 disable   | 忽略            | 立即返回,同close的默认行为                                   | 尽力将发送缓存区中数据发送到对端，然后发送FIN包，四次挥手 |      |
+  | > 0 为enable   | 0               | 立即返回                                                     | 不走正常四次挥手，直接发送RST包，没有TIME_WAIT状态        |      |
+  | > 0 为enbale   | 大于0           | 不管socket是否为blocking或noblocking, 都会阻塞直数据发送完成并收到对端的ACK, 或者linger.l_linger超时 | 如超时不走正常四次挥手，直接发送RST包，没有TIME_WAIT状态  |      |
 
   
 

@@ -149,6 +149,8 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < n; i++) {
       if (events[i].data.fd == lfd) {
         cfd = accept(lfd, NULL, NULL);
+        //int enable = 1;
+        //setsockopt(cfd, IPPROTO_TCP, TCP_NODELAY, (void*)&enable,sizeof(enable));
         //epoll_ctl_add(epfd, cfd, EPOLLIN | EPOLLOUT | EPOLLET);
         epoll_ctl_add(epfd, cfd,  EPOLLIN | EPOLLOUT | EPOLLRDHUP);
         //epoll_ctl_add(epfd, cfd,  EPOLLRDHUP);

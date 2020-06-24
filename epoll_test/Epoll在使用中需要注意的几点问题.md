@@ -72,7 +72,7 @@
 
   4. 下图可以看到发送了`FIN`包
 
-  ![](/home/lw/图片/tcp_fin.png)
+  ![](./tcp_fin.png)
   *  对端close（kill, kill -9）时，如果接收缓冲区内还有数据，不会发送`FIN`包，而是发送`RST`,此时本端：
 
     1. 收到`RST`后的第一次写操作，写失败，errno = 104,  Connection reset by peer; 之后将触发下列事件：
@@ -92,7 +92,7 @@
 
     4. 下面可以看到发送了`RST`包：
 
-![](/home/lw/图片/tcp_rst.png)
+![](./tcp_rst.png)
 
 ##### 阻塞与非阻塞
 

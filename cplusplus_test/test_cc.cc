@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iostream>
 #include <memory>
+#include <vector>
 
 namespace {
 
@@ -177,11 +178,40 @@ void TestForward() {
   Fun2(2);
 }
 
+void TestAuto() {
+  int data = 0;
+  int& rdata = data;
+  auto& d1 = rdata;
+  std::cout << "d1 type by typeid" << typeid(d1).name() << std::endl;
+  std::cout << "data vs rdata : " << (typeid(data) == typeid(rdata) ? 1: 0) << std::endl;
+}
+
+template <class ContainerT>
+class Foo {
+  //typedef typename ContainerT::iterator ItType;
+  //使用decltype, 对于const ContainerT和非const的同时适用
+  typedef decltype(ContainerT().begin()) ItType;
+public:
+  void ShowFirst(ContainerT& container) {
+    ItType it = container.begin();
+    std::cout << "Container first:" << *it << std::endl;
+  }
+};
+
+void TestDecltype() {
+  typedef const std::vector<int> IntVectorType;
+  Foo<IntVectorType> foo;
+  IntVectorType int_vec = {1, 2, 3};
+  foo.ShowFirst(int_vec);
+}
+
 } //namespace 
 
 int main(int argc, char* argv[]) {
   //TestRightValue();
-  TestForward();
+  //TestForward();
+  //TestAuto();
+  TestDecltype();
 
   return 0;
 }

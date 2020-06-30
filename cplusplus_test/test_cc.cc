@@ -1,5 +1,7 @@
 #include <cstring>
+#include <algorithm>
 #include <iostream>
+#include <memory>
 
 namespace {
 
@@ -36,20 +38,21 @@ class MyString {
       std::cout << "Call to destructor" << std::endl;
     }
 
-    MyString& operator =(const MyString& my_string) {
+    MyString& operator=(const MyString& my_string) {
       std::cout << "Call to operator =" << std::endl;
       Clone(my_string.data_);
       return *this;
     }
 
-    MyString& operator =(MyString&& my_string) {
-      std::cout << "Call to move operator =" << std::endl;
-      data_ = my_string.data_;
-      length_ = my_string.length_;
+    MyString& operator=(MyString&& my_string) {
+      if (&my_string != this) {
+        std::cout << "Call to move operator =" << std::endl;
+        data_ = my_string.data_;
+        length_ = my_string.length_;
 
-      my_string.data_ = nullptr;
-      my_string.length_ = 0;
-
+        my_string.data_ = nullptr;
+        my_string.length_ = 0;
+      }
       return *this;
     }
 
@@ -64,10 +67,12 @@ class MyString {
   private:
     void Clone(const char* data) {
       if (nullptr != data) {
-        length_ = strlen(data) + 1;
+        length_ = std::strlen(data) + 1;
         data_ = new char[length_];
-        std::memcpy(data_, data, strlen(data));
-        data_[length_] = '\0';
+        if (nullptr != data_) {
+          std::copy_n(data, std::strlen(data), data_);
+          data_[length_] = '\0';
+        }
       }
     }
 
@@ -85,10 +90,19 @@ class MyString {
 
 MyString MakeMyString(const char* data) {
   MyString my_str(data);
+#if 0
+  return std::move(my_str);
+#else
   return my_str;
+#endif
 }
 
-void testRightValue() {
+std::unique_ptr<MyString>&& MakeMyStringPtr(const char* data) {
+  std::unique_ptr<MyString> my_str(new MyString(data));
+  return std::move(my_str);
+}
+
+void TestRightValue() {
   int i = 0;
   int& lr = i;
   const int& lr2 = 10;
@@ -101,7 +115,7 @@ void testRightValue() {
   str3 = str1;
 #endif
 
-  /*
+#if 0
    * 1. 如果没有禁用返回值优化，不管是否定义了move constructor, 都输出如下：
    * Call to char* constructor
    * MyString => abcd
@@ -120,17 +134,54 @@ void testRightValue() {
 
   MyString str4(MakeMyString(kStrData));
   str4.Show();
-  */
+#endif
 
+#if 0
   MyString str5;
   str5 = MakeMyString(kStrData);
   str5.Show();
+
+  MyString str5(MakeMyString(kStrData));
+  MyString&& str6 = std::move(str5);
+  str6.Show();
+  str5.Show();
+
+  MyString str7(MakeMyString(kStrData));
+#endif
+
+  std::unique_ptr<MyString> str8 = MakeMyStringPtr(kStrData);
+  str8->Show();
+}
+
+void Fun1(int& data) {
+  std::cout << "Call to Fun1 with int" << std::endl;
+}
+
+void Fun1(int&& data) {
+  std::cout << "Call to Fun1 with int&&" << std::endl;
+}
+//void Fun1()
+template <class A>
+void Fun2(A&& data) {
+#if 0
+  Fun1(data);
+#else
+  //完美转发的目标函数的参数，要么是&, 要么是&&
+  Fun1(std::forward<A>(data));
+#endif
+}
+
+void TestForward() {
+  int data = 1;
+  Fun2(data);
+  Fun2(2);
 }
 
 } //namespace 
 
 int main(int argc, char* argv[]) {
-  testRightValue();
+  //TestRightValue();
+  TestForward();
 
   return 0;
 }

@@ -65,6 +65,10 @@ class MyString {
       }
     }
 
+    std::string ToString() const {
+      return (nullptr != data_ ? data_ : "");
+    }
+
   private:
     void Clone(const char* data) {
       if (nullptr != data) {
@@ -88,6 +92,11 @@ class MyString {
     char* data_;
     size_t length_;
 };
+
+std::ostream& operator<<(std::ostream& os, const MyString& my_str) {
+  os << my_str.ToString();
+  return os;
+}
 
 MyString MakeMyString(const char* data) {
   MyString my_str(data);
@@ -205,13 +214,45 @@ void TestDecltype() {
   foo.ShowFirst(int_vec);
 }
 
+using MyStrVector = std::vector<MyString>;
+
+void TestRangeFor() {
+#if 1
+//以下这两种方式都先调用char*构造函数，再调用copy constructor
+#if 0
+  MyStrVector mystr_vector = {
+    "abc",
+    "def",
+    "glm"
+  };
+#else
+  MyStrVector mystr_vector = {
+    MyString("abc"),
+    MyString("def"),
+    MyString("glm"),
+  };
+#endif
+#else
+//以下这种方式都先调用char*构造函数，再调用move constructor
+  MyStrVector mystr_vector;
+  mystr_vector.push_back(MyString("abc"));
+  mystr_vector.push_back(MyString("def"));
+  mystr_vector.push_back(MyString("glm"));
+#endif
+
+  for (const auto& str : mystr_vector) {
+    std::cout << str << std::endl;
+  }
+}
+
 } //namespace 
 
 int main(int argc, char* argv[]) {
   //TestRightValue();
   //TestForward();
   //TestAuto();
-  TestDecltype();
+  //TestDecltype();
+  TestRangeFor();
 
   return 0;
 }

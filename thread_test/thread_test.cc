@@ -61,12 +61,38 @@ void test_detach_thread() {
   std::cout << "main thread end" << std::endl;  
 }
 
+void *thread_loop_func(void *arg)  {
+  pthread_detach(pthread_self());
+
+  std::cout << "thread start" << std::endl;  
+
+  while(1)  {
+    usleep(100);
+  }
+
+  std::cout << "thread end" << std::endl;  
+
+  return (void *)1;  
+}
+
 int main(int argc, char* argv[]) {
   //test_pthread_cancel();
 
-  test_detach_thread();
+  //test_detach_thread();
 
-  getchar();
+  //getchar();
+  //
+  pthread_t tid;  
+  pthread_create(&tid, NULL, thread_loop_func, NULL);  
+  sleep(2);  
+
+  //这个pthread_exit()用在main thread里的时候，
+  //它将使这个main thread退出，但是允许其他线程继续执行，直到结束。
+  //在其他线程运行过程中，从top中可以看到这个main thread状态是z。
+  //另外还在运行的线程状态是R。
+  //这个main thread是z状态，是一种假的僵尸进程，此时使用kill -9 pid可以杀死，真的僵尸进程 kill -9 无法杀死。
+  //为什么这里可以杀死呢？因为main thread tid正好是这个进程组id
+  pthread_exit(0);
 
   return 0;
 }

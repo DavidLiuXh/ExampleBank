@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <functional>
 
 namespace {
 
@@ -245,6 +246,23 @@ void TestRangeFor() {
   }
 }
 
+struct FuncObjT {
+  void operator()(int data) {
+    std::cout << "Call to FuncObjT::() | data:" << data << std::endl;
+  }
+};
+
+void TestStdFunction() {
+  FuncObjT func_obj;
+  //func_obj(100);
+  std::function<void(int)> fun = func_obj;
+  fun(100);
+
+  using FunPtrT = void(*)(int);
+  FunPtrT fun_ptr = [&](int) {
+
+  };
+}
 } //namespace 
 
 int main(int argc, char* argv[]) {
@@ -252,7 +270,8 @@ int main(int argc, char* argv[]) {
   //TestForward();
   //TestAuto();
   //TestDecltype();
-  TestRangeFor();
+  //TestRangeFor();
+  TestStdFunction();
 
   return 0;
 }

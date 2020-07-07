@@ -75,7 +75,14 @@ void *thread_loop_func(void *arg)  {
   return (void *)1;  
 }
 
-int main(int argc, char* argv[]) {
+//查看：ps f -o pid,ppid,pgid,tgid,sid,comm -C thread_test
+void TestPidPgid() {
+  fork();
+
+  while(1);
+}
+
+void TestThread() {
   //test_pthread_cancel();
 
   //test_detach_thread();
@@ -93,6 +100,11 @@ int main(int argc, char* argv[]) {
   //这个main thread是z状态，是一种假的僵尸进程，此时使用kill -9 pid可以杀死，真的僵尸进程 kill -9 无法杀死。
   //为什么这里可以杀死呢？因为main thread tid正好是这个进程组id
   pthread_exit(0);
+}
+
+int main(int argc, char* argv[]) {
+  //TestThread();
+  TestPidPgid();
 
   return 0;
 }

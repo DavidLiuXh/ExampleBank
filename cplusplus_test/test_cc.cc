@@ -331,6 +331,22 @@ void Test__func__() {
   std::cout << tf.Name() << std::endl;
 }
 
+// noexcept表明当前函数不会抛出异常，
+// 编译时会给出下面的warning:
+//t_cc.cc:335:9: warning: throw will always call terminate() [-Wterminate]
+//   throw 1;
+void FuncWithNoexcept() noexcept {
+  throw 1;
+}
+
+void TestNoexcept() noexcept {
+  try {
+    TestNoexcept();
+  } catch (...) {
+    std::cout << "sss" << std::endl;
+  }
+}
+
 int main(int argc, char* argv[]) {
   //TestRightValue();
   //TestForward();
@@ -339,8 +355,8 @@ int main(int argc, char* argv[]) {
   //TestRangeFor();
   //TestStdFunction();
   //TestValueType();
-  TestStringMove();
-
+  //TestStringMove();
+  TestNoexcept();
 
   return 0;
 }

@@ -1,3 +1,5 @@
+#include <cxxabi.h>
+
 #include <cstring>
 #include <algorithm>
 #include <iostream>
@@ -259,11 +261,75 @@ void TestStdFunction() {
   fun(100);
 
   using FunPtrT = void(*)(int);
-  FunPtrT fun_ptr = [&](int) {
-
+  FunPtrT fun_ptr = [](int) {
   };
 }
+
+template <class T>
+std::string type_name() {
+  typedef typename std::remove_reference<T>::type TR;
+
+  std::unique_ptr<char, void(*)(void*)> own(
+#ifndef __GNUC__
+     nullptr,
+#else
+     abi::__cxa_demangle(typeid(TR).name(), nullptr,
+       nullptr, nullptr),
+#endif
+     std::free);
+
+  std::string r = (own != nullptr ? own.get() : typeid(TR).name());
+
+  if (std::is_const<TR>::value)
+    r += " const";
+  if (std::is_volatile<TR>::value)
+    r += " volatile";
+  if (std::is_lvalue_reference<T>::value)
+    r += "&";
+  else if (std::is_rvalue_reference<T>::value)
+    r += "&&";
+
+  return r;
+}
+
+void TestValueType() {
+  int i = 0;
+  auto&& rv = i;
+  std::cout << "rv type:" << type_name<int>() << std::endl;
+}
+
+void TestStringMove() {
+  std::string source_str("abc");
+  std::cout << "source str: " << source_str << std::endl;
+
+  std::string dest_str = std::move(source_str);
+  std::cout << "source str: " << source_str << std::endl;
+  std::cout << "dest str: " << dest_str << std::endl;
+
+  std::vector<std::string> str_vec;
+  str_vec.emplace(str_vec.end(), std::move(dest_str));
+  std::cout << "dest str: " << dest_str << std::endl;
+}
 } //namespace 
+
+// __func__支持用在构造函数中
+class TestFoo {
+  public:
+    TestFoo()
+      :class_name_(__func__) {
+      }
+
+    const char* Name() const {
+      return class_name_;
+    }
+  private:
+    const char* class_name_;
+};
+
+void Test__func__() {
+  TestFoo tf;
+  std::cout << tf.Name() << std::endl;
+}
 
 int main(int argc, char* argv[]) {
   //TestRightValue();
@@ -271,7 +337,10 @@ int main(int argc, char* argv[]) {
   //TestAuto();
   //TestDecltype();
   //TestRangeFor();
-  TestStdFunction();
+  //TestStdFunction();
+  //TestValueType();
+  TestStringMove();
+
 
   return 0;
 }

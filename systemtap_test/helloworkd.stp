@@ -1,0 +1,8 @@
+probe begin
+{
+ print("hello world\n")
+ exit()
+}
+
+#run: sudo stap helloworkd.stp 
+

@@ -6,6 +6,8 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <type_traits>
+#include <atomic>
 
 namespace {
 
@@ -218,6 +220,7 @@ void TestDecltype() {
 }
 
 using MyStrVector = std::vector<MyString>;
+using MyFunPtr = void(*)(int);
 
 void TestRangeFor() {
 #if 1
@@ -310,7 +313,6 @@ void TestStringMove() {
   str_vec.emplace(str_vec.end(), std::move(dest_str));
   std::cout << "dest str: " << dest_str << std::endl;
 }
-} //namespace 
 
 // __func__支持用在构造函数中
 class TestFoo {
@@ -335,7 +337,7 @@ void Test__func__() {
 // 编译时会给出下面的warning:
 //t_cc.cc:335:9: warning: throw will always call terminate() [-Wterminate]
 //   throw 1;
-void FuncWithNoexcept() noexcept {
+void FuncWithNoexcept() noexcept(false) {
   throw 1;
 }
 
@@ -347,6 +349,84 @@ void TestNoexcept() noexcept {
   }
 }
 
+struct TF {
+  int i {
+    0
+  };
+};
+
+class T1 {
+  public:
+    virtual void Show() = 0;
+};
+
+class T2 : public T1 {
+  public:
+    virtual void Show() /*final*/ {
+      std::cout << "Call to  T2::Show" << std::endl;
+    }
+};
+
+class T3 : public T2 {
+  public:
+    virtual void Show() {
+    }
+};
+
+void TestSizeofWithLong() {
+  std::cout << sizeof(short int) << std::endl;//2
+  std::cout << sizeof(int) << std::endl;//4
+  std::cout << sizeof(long int) << std::endl;//8
+  std::cout << sizeof(long long int) << std::endl;//8
+  std::cout << sizeof(float) << std::endl;//4
+  std::cout << sizeof(double) << std::endl;//8
+}
+
+int ReturnRValue() {
+  int tmp = 10;
+  return int(10);
+}
+
+void TestRValue() {
+  int&& d = ReturnRValue();
+  std::cout << "RValue" << d << std::endl;
+
+  std::cout << std::boolalpha;
+
+  std::cout << std::is_lvalue_reference<decltype("sss")>::value << std::endl;
+
+  std::cout << std::is_lvalue_reference<int&>::value << std::endl;
+  std::cout << std::is_lvalue_reference<int>::value << std::endl;
+
+  int i = 0;
+  std::cout << std::is_rvalue_reference<decltype(i++)>::value << std::endl;
+  std::cout << std::is_lvalue_reference<decltype(++i)>::value << std::endl;
+}
+
+constexpr void TestConstexpr() {
+  bool flag = true;
+  if (flag) {
+    return;
+  } else {
+    return ;
+  }
+}
+
+void TestAtomicWithLockfree() {
+  struct A { int a[100]; };
+  struct B { int x, y; };
+
+  std::cout << std::boolalpha
+    << "std::atomic<A> lock free? "
+    //如果加上下面这句，链接时需要 -latomic
+    << std::atomic<A>{}.is_lock_free() //false
+    << std::endl
+    << "std::atomic<B> lock free? "
+    << std::atomic<B>{}.is_lock_free()//true
+    << std::endl;
+}
+} //namespace 
+
 int main(int argc, char* argv[]) {
   //TestRightValue();
   //TestForward();
@@ -356,7 +436,10 @@ int main(int argc, char* argv[]) {
   //TestStdFunction();
   //TestValueType();
   //TestStringMove();
-  TestNoexcept();
+  //TestNoexcept();
+  //TestSizeofWithLong();
+  //TestRValue();
+  TestAtomicWithLockfree();
 
   return 0;
 }

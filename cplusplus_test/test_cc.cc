@@ -112,9 +112,9 @@ MyString MakeMyString(const char* data) {
 #endif
 }
 
-std::unique_ptr<MyString>&& MakeMyStringPtr(const char* data) {
+std::unique_ptr<MyString> MakeMyStringPtr(const char* data) {
   std::unique_ptr<MyString> my_str(new MyString(data));
-  return std::move(my_str);
+  return my_str;
 }
 
 void TestRightValue() {
@@ -349,7 +349,7 @@ void TestNoexcept() noexcept {
   }
 }
 
-struct TF {
+struct TFA {
   int i {
     0
   };
@@ -425,6 +425,103 @@ void TestAtomicWithLockfree() {
     << std::atomic<B>{}.is_lock_free()//true
     << std::endl;
 }
+
+template<typename T>
+void Add(T&& t) {
+}
+
+template<typename T>
+class TFoo {
+  public:
+    //模块类的成员函数不能实现完美转发，必须要定义成模板
+    template<typename U, typename = std::enable_if<std::is_same<T, U>::value>>
+    void Add(U&& u) {
+
+    }
+};
+
+/*
+template<typename T>
+void TFoo<T>::Add(T&& t) {
+}
+*/
+
+void TestShardPtr() {
+  std::shared_ptr<int> data(new int(10));
+  Add(data);
+
+  TFoo<std::shared_ptr<int>> tf;
+  std::shared_ptr<std::string> data1(new std::string(""));
+  tf.Add(data1);
+}
+
+struct TTT {
+  //这个写在类内部，则这个TTT是trivial类型
+  //写在类外部，则不是
+  TTT() = default;
+  ~TTT() = delete;
+  int a;
+};
+//TTT::TTT() = default;
+void TestTrivial() {
+  std::cout << std::is_trivial<TTT>::value << std::endl;
+  std::cout << std::is_pod<TTT>::value << std::endl;
+}
+
+class TF {
+  public:
+    TF() {
+        std::cout << "Call to TF default constructor" << std::endl;
+    }
+
+    TF(const TF& tf)
+      :data_(tf.data_) {
+        std::cout << "Call to TF copy constructor" << std::endl;
+      }
+
+    TF(TF&& tf)
+      :data_(std::move(tf.data_)) {
+        std::cout << "Call to TF move constructor" << std::endl;
+      }
+
+    TF(std::string&& data)
+      :data_(data) {
+        std::cout << "Call to TF std::string constructor" << std::endl;
+      }
+  private:
+    std::string data_;
+};
+
+class TFR {
+  public:
+    TFR() {
+        std::cout << "Call to TFR default constructor" << std::endl;
+    }
+
+    //这里tfr是个右值引用，但实际上它是左值
+    TFR(TFR&& tfr)
+      :data_(std::move(tfr.data_)) {
+      //:data_(tfr.data_) {
+        std::cout << "Call to TFR move constructor" << std::endl;
+      }
+
+    TFR(std::string&& data)
+      :data_(std::move(data)) {
+        std::cout << std::is_rvalue_reference<decltype(data)>::value << std::endl;
+        std::cout << "Call to TFR std::string constructor" << std::endl;
+      }
+  private:
+    //std::string data_;
+    TF data_;
+};
+
+void TestTFR() {
+  TFR tfr1;
+  TFR tfr2 = std::move(tfr1);
+  std::string data("sss");
+  TFR tfr3(std::string("sss"));
+}
+
 } //namespace 
 
 int main(int argc, char* argv[]) {
@@ -439,7 +536,8 @@ int main(int argc, char* argv[]) {
   //TestNoexcept();
   //TestSizeofWithLong();
   //TestRValue();
-  TestAtomicWithLockfree();
+  //TestAtomicWithLockfree();
+  TestTFR();
 
   return 0;
 }

@@ -528,7 +528,6 @@ struct SSS {
   char a;
   int b;
 };
-
 struct align {
   int    a;
   char   b;
@@ -543,10 +542,19 @@ struct testttt {
   int d;
 };
 
+struct __attribute__ ((aligned(8))) my_struct1 {
+  char a;
+  char b;
+  char c;
+  short f[3];
+};//sizeof = 8
+
 //1)将结构体内所有数据成员的长度值相加，记为sum_a； 
 //2)将各数据成员为了内存对齐，按各自对齐模数而填充的字节数累加到和sum_a上，记为sum_b。对齐模数是#pragma pack指定的数值以及该数据成员自身长度中数值较小者。该数据相对起始位置应该是对齐模式的整数倍; 
 //3)将和sum_b向结构体模数对齐，该模数是【#pragma pack指定的数值】、【未指定#pragma pack时，系统默认的对齐模数（32位系统为4字节，64位为8字节）】和【结构体内部最大的基本数据类型成员】长度中数值较小者。结构体的长度应该是该模数的整数倍。  
+//(4)__attribute__(aligned(8))的对齐规和#pragma pack一样，只是结构体的总大小必须是 aligned(n)中n的整数倍   
 void TestAlign() {
+  std::cout << sizeof(my_struct1) << std::endl;//8
   std::cout << sizeof(SSS) << std::endl;//8
 
   printf("__attribute((align)): %zd\n"

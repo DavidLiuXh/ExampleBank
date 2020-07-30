@@ -1,5 +1,7 @@
 #include <cxxabi.h>
+#include <execinfo.h>
 
+#include <stdexcept>
 #include <cstring>
 #include <algorithm>
 #include <iostream>
@@ -522,6 +524,53 @@ void TestTFR() {
   TFR tfr3(std::string("sss"));
 }
 
+struct SSS {
+  char a;
+  int b;
+};
+
+struct align {
+  int    a;
+  char   b;
+  short  c;
+  char d;
+};// __attribute((aligned(8)));
+
+struct testttt {
+  char a;
+  char b;
+  double c;
+  int d;
+};
+
+//1)将结构体内所有数据成员的长度值相加，记为sum_a； 
+//2)将各数据成员为了内存对齐，按各自对齐模数而填充的字节数累加到和sum_a上，记为sum_b。对齐模数是#pragma pack指定的数值以及该数据成员自身长度中数值较小者。该数据相对起始位置应该是对齐模式的整数倍; 
+//3)将和sum_b向结构体模数对齐，该模数是【#pragma pack指定的数值】、【未指定#pragma pack时，系统默认的对齐模数（32位系统为4字节，64位为8字节）】和【结构体内部最大的基本数据类型成员】长度中数值较小者。结构体的长度应该是该模数的整数倍。  
+void TestAlign() {
+  std::cout << sizeof(SSS) << std::endl;//8
+
+  printf("__attribute((align)): %zd\n"
+      "                     a: %p\n"
+      "                     b: %p\n"
+      "                     c: %p\n"
+      "                     d: %p\n",
+      sizeof(struct align),//16
+      (&((struct align*)0)->a),//0
+      (&((struct align*)0)->b),//4
+      (&((struct align*)0)->c),//6
+      (&((struct align*)0)->d));//8
+
+  printf("__attribute((testttt)): %zd\n"
+      "                     a: %p\n"
+      "                     b: %p\n"
+      "                     c: %p\n"
+      "                     d: %p\n",
+      sizeof(struct testttt),//16
+      (&((struct testttt*)0)->a),//0
+      (&((struct testttt*)0)->b),//4
+      (&((struct testttt*)0)->c),//6
+      (&((struct testttt*)0)->d));//8
+}
 } //namespace 
 
 int main(int argc, char* argv[]) {
@@ -537,7 +586,8 @@ int main(int argc, char* argv[]) {
   //TestSizeofWithLong();
   //TestRValue();
   //TestAtomicWithLockfree();
-  TestTFR();
+  //TestTFR();
+  TestAlign();
 
   return 0;
 }

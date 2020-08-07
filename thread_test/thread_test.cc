@@ -75,7 +75,8 @@ void *thread_loop_func(void *arg)  {
   return (void *)1;  
 }
 
-//查看：ps f -o pid,ppid,pgid,tgid,sid,comm -C thread_test
+//查看：ps  -T -eo tid,pid,ppid,pgid,tgid,comm | grep thread_test
+//可以查看包括线程
 void TestPidPgid() {
   fork();
 
@@ -99,11 +100,12 @@ void TestThread() {
   //另外还在运行的线程状态是R。
   //这个main thread是z状态，是一种假的僵尸进程，此时使用kill -9 pid可以杀死，真的僵尸进程 kill -9 无法杀死。
   //为什么这里可以杀死呢？因为main thread tid正好是这个进程组id
-  pthread_exit(0);
+
+  //pthread_exit(0);
 }
 
 int main(int argc, char* argv[]) {
-  //TestThread();
+  TestThread();
   TestPidPgid();
 
   return 0;

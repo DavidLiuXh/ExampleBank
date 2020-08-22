@@ -18,13 +18,19 @@ void QuitHandler(int signum) {
   std::cout << time(NULL) << " Got a quit signal" << signum << std::endl;
 }
 
+void MinPlus2Handler(int signum) {
+  std::cout << time(NULL) << " Got a SIGRTMIN + 2 signal" << signum << std::endl;
+}
+
 void TestSignal() {
   signal(SIGINT, IntHandler);
   signal(SIGQUIT, QuitHandler);
+  //real-time signal
+  signal(SIGRTMIN+2, MinPlus2Handler);
 
   while(true) {
     std::this_thread::sleep_for(10s);
-    std::cout << ".";
+    std::cout << "." << std::endl;
   }
 
   std::cout << std::endl;
@@ -37,6 +43,7 @@ void AlarmHandler(int signum) {
 void TestAlarm() {
   struct sigaction sig;
   sig.sa_handler = AlarmHandler;
+  //sig.sa_handler = SIG_IGN;
   sig.sa_flags = 0;
   sigemptyset(&sig.sa_mask);
 
@@ -66,8 +73,8 @@ void TestAlarm() {
   sigaction(SIGALRM, &old, NULL);
 }
 int main(int argc, char* argv[]) {
-  //TestSignal();
-  TestAlarm();
+  TestSignal();
+  //TestAlarm();
 
   return 0;
 }

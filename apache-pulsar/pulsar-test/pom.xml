@@ -199,11 +199,11 @@
         <artifactId>bcprov-ext-jdk15on</artifactId>
         <version>1.60</version>
       </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-    <version>29.0-jre</version>
-      </dependency>
+    <dependency>
+  <groupId>com.google.guava</groupId>
+  <artifactId>guava</artifactId>
+  <version>[30.0-jre,)</version>
+</dependency>
     <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-all</artifactId>

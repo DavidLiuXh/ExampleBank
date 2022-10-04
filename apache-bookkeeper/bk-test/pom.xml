@@ -99,7 +99,7 @@
     <dependency>
         <groupId>com.google.protobuf</groupId>
         <artifactId>protobuf-java</artifactId>
-        <version>3.16.1</version>
+        <version>3.16.3</version>
     </dependency>
 
      <!--使用本地jar包，非mvn库中的-->

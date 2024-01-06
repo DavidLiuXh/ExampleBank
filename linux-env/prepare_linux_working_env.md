@@ -34,4 +34,4 @@ yum -y groupinstall "development tools"
 2. 编译：
    1. install python3-devel
    2. /configure --with-features=huge --enable-pythoninterp=yes --enable-cscope --enable-fontset --with-python-config-dir=/usr/lib64/python2.7/config --enable-python3interp=yes --with-python3-config-dir=/usr/lib64/python3.6/config-3.6m-x86_64-linux-gnu --with-python3-command=/usr/bin/python3 --enable-multibyte
-   3. 配置从https://github.com/DavidLiuXh/vimrc拉取
+   3. 配置从https://github.com/DavidLiuXh/vimrc 拉取

@@ -1,6 +1,7 @@
 **本文档针对centos系统**
 * 安装开发环境
-yum -y groupinstall "development tools"
+  1. yum -y groupinstall "development tools"
+  2. scl enable devtoolset-8 bash
 * 编译新版linux kernel
 1. download linux kernel source code;
 2. 安装ncurse-devel包 （make menuconfig 文本界面窗口依赖包）

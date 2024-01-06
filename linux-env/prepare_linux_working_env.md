@@ -9,26 +9,26 @@ yum -y groupinstall "development tools"
    yum -y install openssl-devel elfutils-libelf-devel bc
 4. 运行 make menuconfig
 5. 编译
-   make -j n
+   1. make -j n
 6. 编译安装模块
-   make modules_install
+   1. make modules_install
 7. 编译内核核心文件
-   make install
+   1. make install
 8. 将新版本内核设置为默认启动内核
-   grub2-set-default 0
-   0表示 /boot/grub2/grub.cfg 文件中排在第一位的 menuentry 段
+   1. grub2-set-default 0
+   2. 0表示 /boot/grub2/grub.cfg 文件中排在第一位的 menuentry 段
 9. 重启
 * 安装最新版tmux
-  一般yum直接安装的版本太低，从github直接下载最新版自行编译安装
-  编译依赖libevent。
+  1. 一般yum直接安装的版本太低，从github直接下载最新版自行编译安装
+  2. 编译依赖libevent。
 * 安装pythn3
-   sudo yum install https://repo.ius.io/ius-release-el$(rpm -E '%{rhel}').rpm
-   sudo yum update -y
-   sudo yum install -y python3
-   python --version
-   whereis python
+   1. sudo yum install https://repo.ius.io/ius-release-el$(rpm -E '%{rhel}').rpm
+   2. sudo yum update -y
+   3. sudo yum install -y python3
+   4. python --version
+   5. whereis python
    #设置python3为默认，可设可不设，设了yum不能用，需在其脚本中指定python版本
-   update-alternatives --install /usr/bin/python python /usr/bin/python3.6 20
+   6. update-alternatives --install /usr/bin/python python /usr/bin/python3.6 20
 * 安装最新版vim 
 1. 从官网下载源码
 2. 编译：

@@ -2,10 +2,12 @@
 * 安装开发环境
   1. yum -y groupinstall "development tools"
   2. scl enable devtoolset-8 bash
+  3. 把2中的命令放到~/.bash_profile
 * 在centos-dokcer里安装开发环境
   1. sudo yum install centos-release-scl
   2. sudo yum install devtoolset-[8|9d]-gcc*
   3. scl enable devtoolset-[8|9] bash
+  4. 3. 把2中的命令放到~/.bash_profile
 * 编译新版linux kernel
 1. download linux kernel source code;
 2. 安装ncurse-devel包 （make menuconfig 文本界面窗口依赖包）

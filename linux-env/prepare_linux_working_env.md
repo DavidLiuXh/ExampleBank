@@ -32,6 +32,6 @@ yum -y groupinstall "development tools"
 * 安装最新版vim 
 1. 从官网下载源码
 2. 编译：
-   2.1 install python3-devel
-   2.2 /configure --with-features=huge --enable-pythoninterp=yes --enable-cscope --enable-fontset --with-python-config-dir=/usr/lib64/python2.7/config --enable-python3interp=yes --with-python3-config-dir=/usr/lib64/python3.6/config-3.6m-x86_64-linux-gnu --with-python3-command=/usr/bin/python3 --enable-multibyte
-   2.3 配置从https://github.com/DavidLiuXh/vimrc拉取
+   a. install python3-devel
+   b. /configure --with-features=huge --enable-pythoninterp=yes --enable-cscope --enable-fontset --with-python-config-dir=/usr/lib64/python2.7/config --enable-python3interp=yes --with-python3-config-dir=/usr/lib64/python3.6/config-3.6m-x86_64-linux-gnu --with-python3-command=/usr/bin/python3 --enable-multibyte
+   c. 配置从https://github.com/DavidLiuXh/vimrc拉取

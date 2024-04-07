@@ -1,5 +1,5 @@
 **本文档针对centos系统**
-* 安装开发环境
+* 在centos物理机or虚拟机安装开发环境
   1. yum -y groupinstall "development tools"
   2. scl enable devtoolset-8 bash
   3. 把2中的命令放到~/.bash_profile

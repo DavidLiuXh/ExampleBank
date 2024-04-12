@@ -1,4 +1,6 @@
 **本文档针对centos系统**
+* 先确定是否有scl
+  1. yum install scl-utils
 * 在centos物理机or虚拟机安装开发环境
   1. yum -y groupinstall "development tools"
   2. scl enable devtoolset-8 bash

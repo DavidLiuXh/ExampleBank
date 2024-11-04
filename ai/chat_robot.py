@@ -3,7 +3,7 @@
 import openai
 
 # 设置API密钥
-KEY = '[your OpenAI key]'
+KEY = '[]'
 
 COMPLETION_MODEL = "gpt-3.5-turbo"
 

@@ -3,7 +3,7 @@
 import openai
 
 # 设置API密钥
-KEY = '[]'
+key = '[]'
 
 COMPLETION_MODEL = "gpt-3.5-turbo"
 
@@ -14,7 +14,7 @@ class ChatRobot:
             self.num_of_round = 4
 
         self.chat_history = []
-        self.client = openai.OpenAI(api_key=KEY,)
+        self.client = openai.OpenAI(api_key=key,)
 
     def set_chat_category(self, category):
         self.chat_history = []

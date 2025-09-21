@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.ERROR)
 print("Libraries imported.")
 
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "False"
-os.environ["GOOGLE_API_KEY"] = "AIzaSyCRqwQNdLTpdEScgqNYdm7NOxUGUs7UhLc"
+os.environ["GOOGLE_API_KEY"] = "xxxxx"
 
 print("API Keys Set:")
 print(f"Google API Key set: {'Yes' if os.environ.get('GOOGLE_API_KEY') and os.environ['GOOGLE_API_KEY'] != 'YOUR_GOOGLE_API_KEY' else 'No (REPLACE PLACEHOLDER!)'}")

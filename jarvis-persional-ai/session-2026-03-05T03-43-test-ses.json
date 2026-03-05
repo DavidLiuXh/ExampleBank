@@ -1,0 +1,46 @@
+{
+  "sessionId": "test-session-123",
+  "projectHash": "5b38dd41777a8ca984547097b19a1d86271a8bd3236970d1e7dc005baef3fa38",
+  "startTime": "2026-03-05T03:43:27.271Z",
+  "lastUpdated": "2026-03-05T03:43:31.134Z",
+  "messages": [
+    {
+      "id": "9a0d45e5-4fc6-458c-9b4d-a722652a2b09",
+      "timestamp": "2026-03-05T03:43:27.271Z",
+      "type": "user",
+      "content": [
+        {
+          "text": "Hello, are you there?"
+        }
+      ]
+    },
+    {
+      "id": "60ac0317-2d09-42c2-a34b-bd844003b16d",
+      "timestamp": "2026-03-05T03:43:31.134Z",
+      "type": "gemini",
+      "content": "I am here and ready to assist you. How can I help with your project today?",
+      "thoughts": [
+        {
+          "subject": "Answering User Inquiry",
+          "description": "\\n\\n\n\nI've processed the user's initial \"Hello, are you there?\". My response will be a brief, professional confirmation of my availability. I'll adhere strictly to the system's operational guidelines and tone, aiming for minimal output to maintain efficiency. The focus is now on crafting the perfect initial response, ensuring clarity and professionalism.",
+          "timestamp": "2026-03-05T03:43:30.423Z"
+        },
+        {
+          "subject": "Defining the Initial Reply",
+          "description": "\\n\\n\n\nMy current focus is on formulating the response to the user's greeting. Considering the prompt's specifications, I'm aiming for a concise and professional acknowledgement. I've decided on a direct affirmation of my availability, keeping the reply within the prescribed line limit and adhering to the defined tone.",
+          "timestamp": "2026-03-05T03:43:31.042Z"
+        }
+      ],
+      "tokens": {
+        "input": 14695,
+        "output": 18,
+        "cached": 0,
+        "thoughts": 118,
+        "tool": 0,
+        "total": 14831
+      },
+      "model": "gemini-3-flash-preview"
+    }
+  ],
+  "kind": "main"
+}

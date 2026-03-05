@@ -1,0 +1,35 @@
+{
+  "sessionId": "test-session-123",
+  "projectHash": "5b38dd41777a8ca984547097b19a1d86271a8bd3236970d1e7dc005baef3fa38",
+  "startTime": "2026-03-05T03:48:55.007Z",
+  "lastUpdated": "2026-03-05T03:48:56.903Z",
+  "messages": [
+    {
+      "id": "3e2cc609-9dbf-4c33-8e61-52886f43242e",
+      "timestamp": "2026-03-05T03:48:55.007Z",
+      "type": "user",
+      "content": [
+        {
+          "text": "Hello, are you there?"
+        }
+      ]
+    },
+    {
+      "id": "bca9689e-cdb5-4e03-a011-51ae08dbd6ee",
+      "timestamp": "2026-03-05T03:48:56.903Z",
+      "type": "gemini",
+      "content": "I'm here and ready to help. How can I assist you with the Gemini CLI codebase today?",
+      "thoughts": [],
+      "tokens": {
+        "input": 14695,
+        "output": 21,
+        "cached": 14377,
+        "thoughts": 0,
+        "tool": 0,
+        "total": 14716
+      },
+      "model": "gemini-3-flash-preview"
+    }
+  ],
+  "kind": "main"
+}
